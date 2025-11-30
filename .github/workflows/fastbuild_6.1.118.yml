@@ -343,8 +343,8 @@ jobs:
             cd ../common
             patch -p1 < 50_add_susfs_in_gki-${{ env.ANDROID_VERSION }}-${{ env.KERNEL_VERSION }}.patch || true
             patch -p1 -N -F 3 < 69_hide_stuff.patch || true
-          elif [[ ${{ github.event.inputs.ksu_type }} == "rksu" ]]
-            echo "正在为 RKSU 添加补丁..."
+          elif [[ ${{ github.event.inputs.ksu_type }} == "rksu" ]] || [[ ${{ github.event.inputs.ksu_type }} == "kowsu" ]]; then
+            echo "正在为 RKSU/KowSU 添加补丁..."
             cd ./KernelSU
             rm -f kernel/Kbuild
             wget https://raw.githubusercontent.com/rsuntk/KernelSU/susfs-rksu-master/kernel/Kbuild -O kernel/Kbuild
