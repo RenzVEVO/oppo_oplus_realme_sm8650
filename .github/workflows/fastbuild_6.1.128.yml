@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       ksu_type:
-        description: 'KernelSU分支(SukiSU Ultra/KernelSU Next/MKSU/KernelSU(原版),默认SukiSU Ultra)'
+        description: 'KernelSU分支(SukiSU Ultra/KernelSU Next/MKSU/KernelSU(原版)/RKSU/KOWSU/XXKSU,默认SukiSU Ultra)'
         required: true
         type: choice
         default: 'sukisu'
