@@ -356,7 +356,12 @@ jobs:
             git clone https://github.com/ShirkNeko/SukiSU_patch.git
             echo "应用 SM8650 Unmount 修复补丁..."
             wget https://github.com/cctv18/oppo_oplus_realme_sm8650/raw/refs/heads/main/other_patch/fix_umount.patch
-            patch -d common -p1 < fix_umount.patch || echo "fix_umount.patch 应用失败 (可能已存在?)"
+            if patch -d KernelSU -p1 < fix_umount.patch; then
+                echo "fix_umount.patch apply successfully!"
+             else
+                echo "fix_umount.patch apply failed! ((Please check if it is included or if the path is incorrect.)"
+                exit 1
+            fi
             cp ./susfs4ksu/kernel_patches/50_add_susfs_in_gki-${{ env.ANDROID_VERSION }}-${{ env.KERNEL_VERSION }}.patch ./common/
             cp ./susfs4ksu/kernel_patches/fs/* ./common/fs/
             cp ./susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
