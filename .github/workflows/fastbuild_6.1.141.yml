@@ -129,12 +129,9 @@ jobs:
           sudo chmod +x /usr/bin/ccache &&
           rm -f ./ccache &
           
-          echo "正在克隆源码仓库 (完整历史并回退至指定Commit)..."
-          (
-            git clone --single-branch -b oneplus/sm8650_b_16.0.0_oneplus12 https://github.com/cctv18/android_kernel_common_oneplus_sm8650.git common &&
-            cd common &&
-            git reset --hard fee5750d1c10f13be0c2748f4ce0d0dc155d991a
-          ) &
+          echo "正在克隆源码仓库..."
+          git clone --single-branch -b oneplus/sm8650_b_16.0.0_oneplus12 https://github.com/cctv18/android_kernel_common_oneplus_sm8650.git common &&
+          git -C common reset --hard fee5750d1c10f13be0c2748f4ce0d0dc155d991a &
           
           echo "正在克隆llvm-Clang20工具链..." &&
           mkdir -p clang20 &&
