@@ -131,10 +131,9 @@ jobs:
           
           echo "正在克隆源码仓库..."
           aria2c -s16 -x16 -k1M https://github.com/cctv18/android_kernel_common_oneplus_sm8650/archive/fee5750d1c10f13be0c2748f4ce0d0dc155d991a.zip -o common.zip && 
-          mkdir -p repo_temp &&
-          unzip -q common.zip -d repo_temp && 
-          mv repo_temp/* common &&
-          rm -rf repo_temp common.zip &
+          unzip -q common.zip && 
+          mv android_kernel_common_oneplus_sm8650-* common &&
+          rm -rf common.zip &
           
           echo "正在克隆llvm-Clang20工具链..." &&
           mkdir -p clang20 &&
