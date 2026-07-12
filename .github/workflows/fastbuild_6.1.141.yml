@@ -129,11 +129,13 @@ jobs:
           sudo chmod +x /usr/bin/ccache &&
           rm -f ./ccache &
           
-          echo "正在克隆源码仓库..."
-          aria2c -s16 -x16 -k1M https://github.com/cctv18/android_kernel_common_oneplus_sm8650/archive/fee5750d1c10f13be0c2748f4ce0d0dc155d991a.zip -o common.zip && 
-          unzip -q common.zip && 
-          mv android_kernel_common_oneplus_sm8650-* common &&
-          rm -rf common.zip &
+          echo "正在克隆源码仓库 (锁定特定工作提交)..."
+          mkdir common && cd common &&
+          git init &&
+          git remote add origin https://github.com/cctv18/android_kernel_common_oneplus_sm8650.git &&
+          git fetch --depth 1 origin fee5750d1c10f13be0c2748f4ce0d0dc155d991a &&
+          git checkout FETCH_HEAD &&
+          cd .. &
           
           echo "正在克隆llvm-Clang20工具链..." &&
           mkdir -p clang20 &&
