@@ -22,6 +22,11 @@ on:
           - 'ksunext'
           - 'ksu'
           - 'none'
+      ksunext_commit:
+        description: 'KernelSU Next 指定提交哈希/Commit Hash (仅在ksu_type选择ksunext时生效, 留空则默认拉取dev-susfs最新提交)'
+        required: false
+        type: string
+        default: ''
       susfs_enable:
         description: '是否开启susfs(用于增强隐藏环境挂载功能; 可能轻微增加耗电，上游更新导致不稳定时或不需要可关闭)'
         required: true
@@ -136,8 +141,8 @@ jobs:
           # rm -rf common.zip &
           
           echo "正在克隆源码仓库..."
-          git clone --single-branch -b oneplus/sm8650_b_16.0.0_oneplus12 https://github.com/cctv18/android_kernel_common_oneplus_sm8650.git common &&
-          git -C common reset --hard fee5750d1c10f13be0c2748f4ce0d0dc155d991a &
+          git clone --single-branch -b oneplus/sm8650_b_16.0.0_ace_5 https://github.com/OnePlusOSS/android_kernel_common_oneplus_sm8650.git common &&
+          git -C common reset --hard 086936b3387b4018805500fa4069d09637fdb89b &
           
           echo "正在克隆llvm-Clang20工具链..." &&
           mkdir -p clang20 &&
@@ -269,7 +274,19 @@ jobs:
             curl -LSs "https://raw.githubusercontent.com/pershoot/KernelSU-Next/refs/heads/dev-susfs/kernel/setup.sh" | bash -s dev-susfs
             cd KernelSU-Next
             rm -rf .git
-            KSU_VERSION=$(expr $(curl -sI "https://api.github.com/repos/pershoot/KernelSU-Next/commits?sha=dev&per_page=1" | grep -i "link:" | sed -n 's/.*page=\([0-9]*\)>; rel="last".*/\1/p') "+" 30000)
+            # Check out specific commit hash if provided
+            if [[ -n "${{ github.event.inputs.ksunext_commit }}" ]]; then
+            echo "检测到指定 KernelSU Next 提交哈希: ${{ github.event.inputs.ksunext_commit }}"
+              git fetch --unshallow 2>/dev/null || git fetch --all || true
+              git checkout "${{ github.event.inputs.ksunext_commit }}" || git reset --hard "${{ github.event.inputs.ksunext_commit }}"
+            fi
+            # Calculate version number based on the checked-out commit
+            KSU_COUNT=$(git rev-list --count HEAD 2>/dev/null)
+            if [ -n "$KSU_COUNT" ]; then
+              KSU_VERSION=$(expr $KSU_COUNT + 30000)
+            else
+              KSU_VERSION=$(expr $(curl -sI "https://api.github.com/repos/pershoot/KernelSU-Next/commits?sha=dev&per_page=1" | grep -i "link:" | sed -n 's/.*page=\([0-9]*\)>; rel="last".*/\1/p') "+" 30000)
+            fi
             echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
             echo "ksuver=$KSU_VERSION" >> $GITHUB_OUTPUT
             sed -i "s/KSU_VERSION_FALLBACK := 1/KSU_VERSION_FALLBACK := $KSU_VERSION/g" kernel/Kbuild
