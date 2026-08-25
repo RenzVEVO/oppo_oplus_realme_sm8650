@@ -22,11 +22,6 @@ on:
           - 'ksunext'
           - 'ksu'
           - 'none'
-      ksunext_commit:
-        description: 'KernelSU Next 指定提交哈希/Commit Hash (仅在ksu_type选择ksunext时生效, 留空则默认拉取dev-susfs最新提交)'
-        required: false
-        type: string
-        default: ''
       susfs_enable:
         description: '是否开启susfs(用于增强隐藏环境挂载功能; 可能轻微增加耗电，上游更新导致不稳定时或不需要可关闭)'
         required: true
@@ -272,26 +267,14 @@ jobs:
             echo "正在配置KernelSU Next..."
             curl -LSs "https://raw.githubusercontent.com/pershoot/KernelSU-Next/refs/heads/dev-susfs/kernel/setup.sh" | bash -s dev-susfs
             cd KernelSU-Next
-            # Check out specific commit hash if provided
-            if [[ -n "${{ github.event.inputs.ksunext_commit }}" ]]; then
-              echo "检测到指定 KernelSU Next 提交哈希: ${{ github.event.inputs.ksunext_commit }}"
-              git fetch --unshallow 2>/dev/null || git fetch --all || true
-              git checkout "${{ github.event.inputs.ksunext_commit }}" || git reset --hard "${{ github.event.inputs.ksunext_commit }}"
-            fi
-            #Calculate version number based on the checked-out commit
-            KSU_COUNT=$(git rev-list --count HEAD 2>/dev/null)
-            if [ -n "$KSU_COUNT" ]; then
-              KSU_VERSION=$(expr $KSU_COUNT + 30000)
-            else
-              KSU_VERSION=$(expr $(curl -sI "https://api.github.com/repos/pershoot/KernelSU-Next/commits?sha=dev&per_page=1" | grep -i "link:" | sed -n 's/.*page=\([0-9]*\)>; rel="last".*/\1/p') "+" 30000)
-            fi
             rm -rf .git
+            KSU_VERSION=$(expr $(curl -sI "https://api.github.com/repos/pershoot/KernelSU-Next/commits?sha=dev&per_page=1" | grep -i "link:" | sed -n 's/.*page=\([0-9]*\)>; rel="last".*/\1/p') "+" 30000)
             echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
             echo "ksuver=$KSU_VERSION" >> $GITHUB_OUTPUT
             sed -i "s/KSU_VERSION_FALLBACK := 1/KSU_VERSION_FALLBACK := $KSU_VERSION/g" kernel/Kbuild
             KSU_GIT_TAG=$(curl -sL "https://api.github.com/repos/KernelSU-Next/KernelSU-Next/tags" | grep -o '"name": *"[^"]*"' | head -n 1 | sed 's/"name": "//;s/"//')
             sed -i "s/KSU_VERSION_TAG_FALLBACK := v0.0.1/KSU_VERSION_TAG_FALLBACK := $KSU_GIT_TAG/g" kernel/Kbuild
-            # 为KernelSU Next添加WildKSU管理器支持
+            #为KernelSU Next添加WildKSU管理器支持
             cd ../common/drivers/kernelsu
             wget https://github.com/$GITHUB_REPOSITORY/raw/refs/heads/$GITHUB_REF_NAME/other_patch/apk_sign.patch
             patch -p2 -N -F 3 < apk_sign.patch || true
