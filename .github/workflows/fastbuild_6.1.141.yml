@@ -305,7 +305,6 @@ jobs:
             cp ./pershoot_susfs/kernel_patches/include/linux/* ./common/include/linux/
             cd ./common
             patch -p1 -F 3 < 50_add_susfs_in_gki-${{ env.ANDROID_VERSION }}-${{ env.KERNEL_VERSION }}.patch || true
-            patch -p1 -N -F 3 < 69_hide_stuff.patch || true
             cd ..
           else
             echo "已选择无内置KernelSU模式，跳过susfs配置..."
